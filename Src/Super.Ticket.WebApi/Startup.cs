@@ -15,6 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Security.Claims;
 
 namespace Super.Ticket.WebApi
 {
@@ -44,6 +46,39 @@ namespace Super.Ticket.WebApi
             {
                 options.Filters.Add(typeof(TicketCustomExceptionFilterAttribute));
             });
+
+            services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddCookie()
+            .AddJwtBearer(cfg => {
+                cfg.Authority  = "https://accounts.google.com"; // use env/cfg var
+                cfg.Audience = "951705324268-0d03as6du1nj4f30rfu6sp9pmaj5t0he.apps.googleusercontent.com";
+
+                cfg.Events = new JwtBearerEvents() {
+                    OnTokenValidated = async ctx => {
+                        if (!ctx.Principal.HasClaim(c => c.Type == ClaimTypes.Role)) {
+                            // once token is valided, in case roles are missing ... 
+                            
+                            var email = ctx.Principal.Claims.Where(c => c.Type == ClaimTypes.Email).FirstOrDefault();
+
+                            if (email != null) {
+                                var claims = new List<Claim>();
+
+                                // code to get the roles claims
+                                // var userClaims = await ....() .... / return a preference a list of strings with role identification 
+                                // claims.AddRange(userClaims.Select(c => new Claim(c)));
+
+                                // after above code, we should have a list of claims, manually builded, ready to attach to our token
+
+                                var identiy = new ClaimsIdentity(claims);
+                                ctx.Principal.AddIdentity(identiy);
+                            }
+                        }
+                    }
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,6 +94,9 @@ namespace Super.Ticket.WebApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
