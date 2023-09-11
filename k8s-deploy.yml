@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ms-name-api
+  name: ticket-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      component: ms-name-api
+      component: ticket-api
   template:
     metadata:
       labels:
-        component: ms-name-api
+        component: ticket-api
     spec:
       containers:
-        - name: ms-name-api
-          image: hub.docker.com/ms-name-api:{BUILD_NO}
+        - name: ticket-api
+          image: hub.docker.com/ticket-api:{BUILD_NO}
           imagePullPolicy: Always
           ports:
             - containerPort: 80

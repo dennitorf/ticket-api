@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:  
-  name: ms-name-api
+  name: ticket-api
 spec:
   ports:
   - port : 80
     protocol: TCP
     targetPort: 80
   selector:
-    component: ms-name-api
+    component: ticket-api
   type: ClusterIP
